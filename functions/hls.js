@@ -1,5 +1,4 @@
 export async function onRequest({ request }) {
-  // 🔥 handle preflight
   if (request.method === "OPTIONS") {
     return new Response(null, {
       headers: {
@@ -17,8 +16,9 @@ export async function onRequest({ request }) {
     return new Response("No URL", { status: 400 })
   }
 
-  // 🔥 spoof header biar lolos proteksi
   const headers = new Headers()
+
+  // 🔥 spoof header
   headers.set("user-agent", "Mozilla/5.0")
   headers.set("referer", "https://player.787200.com/")
   headers.set("origin", "https://player.787200.com")
@@ -31,9 +31,9 @@ export async function onRequest({ request }) {
   const res = await fetch(target, { headers })
   const contentType = res.headers.get("content-type") || ""
 
-  // =====================================================
-  // 🔥 HANDLE M3U8 (rewrite semua URL ke proxy)
-  // =====================================================
+  // =========================
+  // 🔥 HANDLE M3U8
+  // =========================
   if (contentType.includes("mpegurl") || target.includes(".m3u8")) {
     let text = await res.text()
 
@@ -58,9 +58,9 @@ export async function onRequest({ request }) {
     })
   }
 
-  // =====================================================
-  // 🔥 HANDLE SEGMENT (.ts / .aac)
-  // =====================================================
+  // =========================
+  // 🔥 HANDLE SEGMENT
+  // =========================
   const newHeaders = new Headers(res.headers)
 
   newHeaders.set("Access-Control-Allow-Origin", "*")
