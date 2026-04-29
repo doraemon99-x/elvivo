@@ -25,12 +25,11 @@ html, body {
 <div id="player"></div>
 
 <script>
-const params = new URLSearchParams(window.location.search)
-const stream = params.get("url")
+async function start() {
+  const res = await fetch("/functions/get-stream")
+  const data = await res.json()
 
-if (!stream) {
-  document.body.innerHTML = "<h2 style='color:white'>No stream URL</h2>"
-} else {
+  const stream = data.stream
 
   const videoUrl = "/functions/hls?url=" + encodeURIComponent(stream)
 
@@ -42,25 +41,21 @@ if (!stream) {
       url: videoUrl,
       type: "customHls",
       customType: {
-        customHls: function(video, player) {
+        customHls: function(video) {
           if (Hls.isSupported()) {
-            const hls = new Hls({
-              maxBufferLength: 30,
-              enableWorker: true,
-            })
-
+            const hls = new Hls()
             hls.loadSource(videoUrl)
             hls.attachMedia(video)
-
-          } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+          } else {
             video.src = videoUrl
           }
         }
       }
     }
   })
-
 }
+
+start()
 </script>
 
 </body>
