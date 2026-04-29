@@ -2,8 +2,11 @@
 <html>
 <head>
 <meta charset="UTF-8">
+
 <script src="https://ssl.p.jwpcdn.com/player/v/8.31.0/jwplayer.js"></script>
-<script>jwplayer.key = "7MeMRClEneUmFoHRO3u3ypzAZXlVgNtBE2pKDw==";</script>
+<script>
+jwplayer.key = "7MeMRClEneUmFoHRO3u3ypzAZXlVgNtBE2pKDw==";
+</script>
 
 <style>
 html, body {
@@ -19,30 +22,43 @@ html, body {
 </head>
 
 <body>
+
 <div id="player"></div>
 
 <script>
+// ambil URL stream dari query param
 const params = new URLSearchParams(window.location.search)
 const stream = params.get("url")
 
-jwplayer("player").setup({
-  file: "/hls?url=" + encodeURIComponent(stream),
-  type: "hls",
-  width: "100%",
-  height: "100%",
-  autostart: true,
-  primary: "html5",
-  preload: "auto",
-  hlshtml: true,
+if (!stream) {
+  document.body.innerHTML = "<h2 style='color:white'>No stream URL</h2>"
+} else {
 
-  // 🔥 WAJIB untuk iframe
-  fullscreen: {
-    enabled: true
-  },
-  pipIcon: "enabled",
-  stretching: "uniform"
-})
+  jwplayer("player").setup({
+    file: "/functions/hls?url=" + encodeURIComponent(stream),
+    type: "hls",
 
+    width: "100%",
+    height: "100%",
+    autostart: true,
+    mute: false,
+
+    primary: "html5",
+    preload: "auto",
+    hlshtml: true,
+
+    stretching: "uniform",
+
+    // optional fitur
+    playbackRateControls: true,
+    pipIcon: "enabled",
+
+    fullscreen: {
+      enabled: true
+    }
+  })
+
+}
 </script>
 
 </body>
