@@ -28,14 +28,39 @@ html, body {
 const params = new URLSearchParams(window.location.search)
 const stream = params.get("url")
 
-const dp = new DPlayer({
-  container: document.getElementById('player'),
-  autoplay: true,
-  video: {
-    url: "/functions/hls?url=" + encodeURIComponent(stream),
-    type: "hls",
-  }
-})
+if (!stream) {
+  document.body.innerHTML = "<h2 style='color:white'>No stream URL</h2>"
+} else {
+
+  const videoUrl = "/functions/hls?url=" + encodeURIComponent(stream)
+
+  const dp = new DPlayer({
+    container: document.getElementById('player'),
+    autoplay: true,
+    live: true,
+    video: {
+      url: videoUrl,
+      type: "customHls",
+      customType: {
+        customHls: function(video, player) {
+          if (Hls.isSupported()) {
+            const hls = new Hls({
+              maxBufferLength: 30,
+              enableWorker: true,
+            })
+
+            hls.loadSource(videoUrl)
+            hls.attachMedia(video)
+
+          } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+            video.src = videoUrl
+          }
+        }
+      }
+    }
+  })
+
+}
 </script>
 
 </body>
