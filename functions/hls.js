@@ -1,5 +1,5 @@
 export async function onRequest({ request }) {
-  // 🔥 Handle CORS preflight
+  // 🔥 handle preflight
   if (request.method === "OPTIONS") {
     return new Response(null, {
       headers: {
@@ -17,7 +17,7 @@ export async function onRequest({ request }) {
     return new Response("No URL", { status: 400 })
   }
 
-  // 🔥 Header spoof (WAJIB untuk vivo200)
+  // 🔥 spoof header biar lolos proteksi
   const headers = new Headers()
   headers.set("user-agent", "Mozilla/5.0")
   headers.set("referer", "https://player.787200.com/")
@@ -25,7 +25,6 @@ export async function onRequest({ request }) {
   headers.set("accept", "*/*")
   headers.set("accept-encoding", "identity")
 
-  // support range (video chunk)
   const range = request.headers.get("range")
   if (range) headers.set("range", range)
 
@@ -33,7 +32,7 @@ export async function onRequest({ request }) {
   const contentType = res.headers.get("content-type") || ""
 
   // =====================================================
-  // 🔥 HANDLE M3U8 (REWRITE PLAYLIST)
+  // 🔥 HANDLE M3U8 (rewrite semua URL ke proxy)
   // =====================================================
   if (contentType.includes("mpegurl") || target.includes(".m3u8")) {
     let text = await res.text()
@@ -43,17 +42,14 @@ export async function onRequest({ request }) {
     text = text.split("\n").map(line => {
       if (!line || line.startsWith("#")) return line
 
-      // convert ke absolute URL
       let absolute = line.startsWith("http")
         ? line
         : base + line
 
-      // 🔥 route ulang lewat proxy
       return `/functions/hls?url=${encodeURIComponent(absolute)}`
     }).join("\n")
 
     return new Response(text, {
-      status: 200,
       headers: {
         "Content-Type": "application/vnd.apple.mpegurl",
         "Access-Control-Allow-Origin": "*",
@@ -63,7 +59,7 @@ export async function onRequest({ request }) {
   }
 
   // =====================================================
-  // 🔥 HANDLE SEGMENT (.ts / .aac / dll)
+  // 🔥 HANDLE SEGMENT (.ts / .aac)
   // =====================================================
   const newHeaders = new Headers(res.headers)
 
